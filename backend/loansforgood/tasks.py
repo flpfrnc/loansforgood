@@ -34,8 +34,7 @@ def process_proposals():
     except Exception as e:
         print(e)
 
-    approval_result = {
-        "approved" if approval_status["approved"] == True else "not approved"}
+    approval_result = "approved" if approval_status["approved"] == True else "not approved"
     return f'loan proposal #{loan_proposal.id} {approval_result}'
 
 

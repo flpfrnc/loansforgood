@@ -6,14 +6,17 @@ from django.db import models
 class LoanProposal(models.Model):
     name = models.CharField(max_length=100, name="name")
     document = models.CharField(max_length=100, name="document")
-    birth_date = models.DateField(name="birth_date", null=True)
-    phone = models.CharField(max_length=15, name="phone", null=True)
-    email = models.CharField(max_length=100, name="email", null=True)
+    birth_date = models.DateField(name="birth_date", null=True, blank=True)
+    phone = models.CharField(
+        max_length=15, name="phone", null=True, blank=True)
+    email = models.CharField(
+        max_length=100, name="email", null=True, blank=True)
     amount = models.DecimalField(
-        name="amount", decimal_places=2, max_digits=10, null=True)
+        name="amount", decimal_places=2, max_digits=10, null=True, blank=True)
     mother_name = models.CharField(
-        max_length=100, name="mother_name", null=True)
-    occupation = models.CharField(max_length=100, name="occupation", null=True)
+        max_length=100, name="mother_name", null=True, blank=True)
+    occupation = models.CharField(
+        max_length=100, name="occupation", null=True, blank=True)
     status = models.CharField(default="pending", max_length=20)
     approved = models.BooleanField(default=False)
 
