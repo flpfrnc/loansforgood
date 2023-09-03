@@ -6,7 +6,7 @@ from django.db import models
 class LoanProposal(models.Model):
     name = models.CharField(max_length=100, name="name")
     document = models.CharField(max_length=100, name="document")
-    birth_date = models.DateTimeField(name="birth_date", null=True)
+    birth_date = models.DateField(name="birth_date", null=True)
     phone = models.CharField(max_length=15, name="phone", null=True)
     email = models.CharField(max_length=100, name="email", null=True)
     amount = models.DecimalField(

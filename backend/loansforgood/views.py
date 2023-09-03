@@ -15,6 +15,7 @@ class StatusView(APIView):
 
 class FormFieldView(APIView):
 
+    # FormFieldView will only have a get method, once the field creation is going to be managed by the admin
     def get(self, request: Request) -> Response:
         fields = FormField.objects.all()
         serializer = FormFieldSerializer(fields, many=True)
@@ -25,17 +26,12 @@ class FormFieldView(APIView):
 class LoanProposalView(APIView):
 
     def post(self, request: Request) -> Response:
-        loan_proposal = LoanProposal.objects.create(
-            name=request.data["name"],
-            document=request.data["document"],
-            birth_date=request.data["birth_date"],
-            phone=request.data["phone"],
-            amount=request.data["amount"],
-            mother_name=request.data["mother_name"],
-            occupation=request.data["occupation"])
-        loan_proposal.save()
 
-        return Response(status=HTTP_201_CREATED)
+        serializer = LoanProposalSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+
+            return Response(data=serializer.data, status=HTTP_201_CREATED)
 
     def get(self, request: Request) -> Response:
         loan_proposals = LoanProposal.objects.all()
