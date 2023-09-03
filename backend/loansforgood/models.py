@@ -8,6 +8,7 @@ class LoanProposal(models.Model):
     document = models.CharField(max_length=100, name="document")
     birth_date = models.DateTimeField(name="birth_date", null=True)
     phone = models.CharField(max_length=15, name="phone", null=True)
+    email = models.CharField(max_length=100, name="email", null=True)
     amount = models.DecimalField(
         name="amount", decimal_places=2, max_digits=10, null=True)
     mother_name = models.CharField(
@@ -20,7 +21,6 @@ class LoanProposal(models.Model):
     updated_at = models.DateTimeField(auto_now=True, name="updated_at")
 
     def __str__(self):
-        # return '%s - %s: %s' (self.name, self.document, self.approved)
         return self.name
 
     class Meta:
