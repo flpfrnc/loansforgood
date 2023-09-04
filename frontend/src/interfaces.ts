@@ -14,6 +14,7 @@ export const fieldMapper: Record<string, string> = {
   ["Data de Nascimento"]: "birthDate",
   Valor: "amount",
   Telefone: "phone",
+  Email: "email",
   ["Nome da Mãe"]: "motherName",
   Ocupação: "occupation",
 };

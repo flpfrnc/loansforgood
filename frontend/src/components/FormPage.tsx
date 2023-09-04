@@ -13,12 +13,27 @@ export default function FormPage() {
     birthDate: "",
     amount: 0,
     phone: "",
+    email: "",
     motherName: "",
     occupation: "",
   });
 
   function getCsrfToken() {
     return decodeURIComponent(document.cookie.split("csrftoken=")[1]);
+  }
+
+  /**
+   * Guarantees that non numeric fields (inner array) won't receive number inputs
+   * @param field string
+   * @param value string | number
+   * @returns `string | number`
+   */
+  function sanitizeNonNumeric(field: string, value: string | number) {
+    if (["name", "motherName"].includes(field)) {
+      return (value as string).replace(/[\d-]/g, "");
+    }
+
+    return value;
   }
 
   async function sendProposal(e: FormEvent<HTMLFormElement>) {
@@ -30,12 +45,13 @@ export default function FormPage() {
       birth_date: fieldStates.birthDate,
       amount: fieldStates.amount,
       phone: fieldStates.phone,
+      email: fieldStates.email,
       mother_name: fieldStates.motherName,
       occupation: fieldStates.occupation,
     };
 
     try {
-      await fetch(`http://localhost:8000/loans/`, {
+      await fetch(import.meta.env.VITE_API_BASE_URL + "loans/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,6 +66,7 @@ export default function FormPage() {
         birthDate: "",
         amount: 0,
         phone: "",
+        email: "",
         motherName: "",
         occupation: "",
       });
@@ -65,14 +82,14 @@ export default function FormPage() {
   }
 
   async function fetchFields() {
-    const fields: Field[] = await fetch(`http://localhost:8000/fields`, {
+    const fields: Field[] = await fetch(import.meta.env.VITE_API_BASE_URL + "fields", {
       method: "GET",
     }).then((response) => response.json());
 
     fields.map((field: Field) =>
       setFieldStates({
         ...fieldStates,
-        [fieldMapper[field.field_name]]: field.field_type === "text" ? "" : 0,
+        [fieldMapper[field.field_name]]: field.field_type === "number" ? 0 : "",
       })
     );
 
@@ -106,7 +123,10 @@ export default function FormPage() {
                   id={fieldMapper[field.field_name]}
                   name={fieldMapper[field.field_name]}
                   placeholder=""
-                  value={fieldStates[fieldMapper[field.field_name]]}
+                  value={sanitizeNonNumeric(
+                    fieldMapper[field.field_name],
+                    fieldStates[fieldMapper[field.field_name]]
+                  )}
                   onChange={(e) => {
                     setFieldStates({
                       ...fieldStates,
