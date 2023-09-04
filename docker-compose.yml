@@ -1,0 +1,80 @@
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    networks:
+      - postgres-network
+  celery-worker:
+    restart: always
+    container_name: celery
+    command: "celery -A loansforgood worker --loglevel=info"
+    build:
+      context: ./backend/
+    depends_on:
+      - redis
+      - backend  # Make sure Celery waits for the backend service to start
+    networks:
+      - postgres-network
+  celery-beat:
+    restart: always
+    container_name: celery-beat
+    command: celery -A loansforgood.celery beat --loglevel=info
+    build:
+      context: ./backend/
+    depends_on:
+      - redis
+      - backend
+    networks:
+      - postgres-network
+  backend:
+    restart: always
+    container_name: backend
+    command : bash -c "python manage.py makemigrations &&
+                      python manage.py migrate &&
+                      python manage.py test loansforgood --verbosity 2 &&
+                      python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./backend/api/.env
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - postgres-network
+
+  frontend:
+    restart: always
+    command : npm run dev -- --port 3000 --host
+    container_name: front
+    env_file:
+      - ./frontend/.env
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - postgres-network
+  db:
+    image: postgres
+    restart: always
+    container_name: postgres_db
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+    ports:
+      - "5433:5433"
+    volumes:
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - postgres-network
+volumes:
+  postgres_data:
+
+networks: 
+  postgres-network:
+    driver: bridge
