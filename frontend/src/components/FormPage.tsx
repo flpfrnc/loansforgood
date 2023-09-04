@@ -40,14 +40,14 @@ export default function FormPage() {
     e.preventDefault();
 
     const data = {
-      name: fieldStates.name,
-      document: fieldStates.document,
-      birth_date: fieldStates.birthDate,
-      amount: fieldStates.amount,
-      phone: fieldStates.phone,
-      email: fieldStates.email,
-      mother_name: fieldStates.motherName,
-      occupation: fieldStates.occupation,
+      name: fieldStates.name || undefined,
+      document: fieldStates.document || undefined,
+      birth_date: fieldStates.birthDate || undefined,
+      amount: fieldStates.amount || undefined,
+      phone: fieldStates.phone || undefined,
+      email: fieldStates.email || undefined,
+      mother_name: fieldStates.motherName || undefined,
+      occupation: fieldStates.occupation || undefined,
     };
 
     try {
