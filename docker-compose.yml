@@ -33,6 +33,7 @@ services:
     command : bash -c "python manage.py makemigrations &&
                       python manage.py migrate &&
                       python manage.py test loansforgood --verbosity 2 &&
+                      python manage.py shell < createsuperuser.py &&
                       python manage.py runserver 0.0.0.0:8000"
     env_file:
       - ./backend/api/.env
@@ -70,7 +71,7 @@ services:
     environment:
       POSTGRES_PASSWORD: "postgres"
     ports:
-      - "5433:5433"
+      - "5432:5432"
     volumes:
       - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
       - postgres_data:/var/lib/postgresql/data/
