@@ -9,3 +9,7 @@ RUN npm install
 COPY . ./
 
 EXPOSE 3000
+
+ENV CI=true
+
+RUN npm run test

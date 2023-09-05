@@ -49,11 +49,7 @@ services:
 
   frontend:
     restart: always
-    command:
-      - sh
-      - -c
-      - |
-        npm run test && npm run dev -- --port 3000 --host
+    command: "npm run dev -- --port 3000 --host"
     container_name: front
     env_file:
       - ./frontend/.env
