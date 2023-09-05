@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Field, fieldMapper } from "../interfaces";
+import { axiosInstance } from "../api";
+import { sanitizeNonNumeric } from "../utils";
 
 export default function FormPage() {
   const [availableFields, setAvailableFields] = useState<Field[]>([]);
@@ -18,24 +20,6 @@ export default function FormPage() {
     occupation: "",
   });
 
-  function getCsrfToken() {
-    return decodeURIComponent(document.cookie.split("csrftoken=")[1]);
-  }
-
-  /**
-   * Guarantees that non numeric fields (inner array) won't receive number inputs
-   * @param field string
-   * @param value string | number
-   * @returns `string | number`
-   */
-  function sanitizeNonNumeric(field: string, value: string | number) {
-    if (["name", "motherName"].includes(field)) {
-      return (value as string).replace(/[\d-]/g, "");
-    }
-
-    return value;
-  }
-
   async function sendProposal(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -51,14 +35,10 @@ export default function FormPage() {
     };
 
     try {
-      await fetch(import.meta.env.VITE_API_BASE_URL + "loans/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCsrfToken(),
-        },
-        body: JSON.stringify(data),
-      });
+      await axiosInstance.post(
+        import.meta.env.VITE_AXIOS_BASE_URL + "loans/",
+        JSON.stringify(data)
+      );
 
       setFieldStates({
         name: "",
@@ -82,18 +62,20 @@ export default function FormPage() {
   }
 
   async function fetchFields() {
-    const fields: Field[] = await fetch(import.meta.env.VITE_API_BASE_URL + "fields", {
-      method: "GET",
-    }).then((response) => response.json());
+    try {
+      const { data } = await axiosInstance.get(import.meta.env.VITE_AXIOS_BASE_URL + "fields");
 
-    fields.map((field: Field) =>
-      setFieldStates({
-        ...fieldStates,
-        [fieldMapper[field.field_name]]: field.field_type === "number" ? 0 : "",
-      })
-    );
+      data.map((field: Field) =>
+        setFieldStates({
+          ...fieldStates,
+          [fieldMapper[field.field_name]]: field.field_type === "number" ? 0 : "",
+        })
+      );
 
-    setAvailableFields(fields.filter((field) => field.is_visible === true));
+      setAvailableFields(data.filter((field: Field) => field.is_visible === true));
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   useEffect(() => {
@@ -115,7 +97,11 @@ export default function FormPage() {
           </h1>
           <div className="flex flex-col items-center justify-center gap-2">
             {availableFields.map((field, index) => (
-              <div className="relative w-full" key={field.field_name + index}>
+              <div
+                data-testid="form-field"
+                className="relative w-full"
+                key={field.field_name + index}
+              >
                 <input
                   required={field.is_required}
                   className="w-full px-2 outline-none border border-gray-150 h-[42px] rounded-md peer"
@@ -147,13 +133,16 @@ export default function FormPage() {
           </div>
           <div className="w-full text-center">
             <button
+              data-testid="submit-proposal"
               className="w-full mt-auto my-4 p-4 border h-[42px] flex justify-center items-center bg-[#4A3EB5] hover:bg-[#5340f5] active:bg-[#2f248f] text-white"
               type="submit"
             >
               Enviar Proposta
             </button>
             {successMessage.isShown && (
-              <small className="text-green-600">{successMessage.message}</small>
+              <small data-testid="success-message" className="text-green-600">
+                {successMessage.message}
+              </small>
             )}
           </div>
         </div>
