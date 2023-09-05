@@ -27,11 +27,14 @@ class LoanProposalView(APIView):
 
     def post(self, request: Request) -> Response:
 
-        serializer = LoanProposalSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
+        try:
+            serializer = LoanProposalSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
 
-            return Response(data=serializer.data, status=HTTP_201_CREATED)
+                return Response(data=serializer.data, status=HTTP_201_CREATED)
+        except Exception:
+            return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     def get(self, request: Request) -> Response:
         loan_proposals = LoanProposal.objects.all()
